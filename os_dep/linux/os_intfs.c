@@ -739,8 +739,8 @@ static const struct file_operations proc_get_best_channel_fops = {
 	.owner = THIS_MODULE,
 	.open = proc_get_best_channel_open,
 	.read = seq_read,
-	.write = proc_set_best_channel,
 	.llseek = seq_lseek,
+	.write = proc_set_best_channel,
 	.release = single_release,
 };
 

@@ -1573,7 +1573,26 @@ int proc_get_best_channel(struct seq_file *m, void *data)
 ssize_t proc_set_best_channel(struct file *file, const char *buffer,
 		size_t count, loff_t *pos)
 {
-	return 0;
+	struct net_device *dev = (struct net_device *)pos;
+	_adapter *padapter = (_adapter *)rtw_netdev_priv(dev);
+	struct mlme_ext_priv *pmlmeext = &padapter->mlmeextpriv;
+	char tmp[32];
+
+	if(count < 1)
+		return -EFAULT;
+
+	if(buffer && !copy_from_user(tmp, buffer, sizeof(tmp)))
+	{
+		int i;
+		for(i = 0; pmlmeext->channel_set[i].ChannelNum != 0; i++)
+		{
+			pmlmeext->channel_set[i].rx_count = 0;
+		}
+
+		DBG_871X("set %s\n", "Clean Best Channel Count");
+	}
+
+	return count;
 }
 #endif
 
