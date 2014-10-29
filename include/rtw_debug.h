@@ -599,7 +599,7 @@ int proc_set_odm_adaptivity(struct file *file, const char *buffer, unsigned long
 
 	int proc_get_odm_dbg_comp(struct seq_file *m, void *data);
 
-	int proc_set_odm_dbg_comp(struct file *file, const char *buffer,
+	ssize_t proc_set_odm_dbg_comp(struct file *file, const char *buffer,
 			size_t count, loff_t *pos);
 
 	int proc_get_odm_dbg_level(struct seq_file *m, void *data);
