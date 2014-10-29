@@ -880,15 +880,6 @@ void rtw_proc_init_one(struct net_device *dev)
 
 	rtw_proc_cnt++;
 
-#ifdef CONFIG_FIND_BEST_CHANNEL
-	entry = proc_create_data("best_channel", S_IFREG | S_IRUGO,
-				   dir_dev, &proc_best_channel_fops, dev);
-	if (!entry) {
-		DBG_871X("Unable to create_proc_read_entry!\n");
-		return;
-	}
-#endif
-
 	entry = proc_create_data("write_reg", S_IFREG | S_IRUGO,
 				   dir_dev, &proc_write_reg_fops, dev);
 	if (!entry) {
