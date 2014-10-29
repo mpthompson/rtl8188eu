@@ -27,3 +27,10 @@
 *.i*86
 *.x86_64
 *.hex
+
+# Other
+*.cmd
+*.order
+*.symvers
+.tmp_versions
+8188eu.mod.c
