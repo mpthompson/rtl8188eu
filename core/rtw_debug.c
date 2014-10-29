@@ -1378,6 +1378,8 @@ int proc_get_drv_version(struct seq_file *m, void *data)
 #ifdef DBG_MEM_ALLOC
 int proc_get_mstat(struct seq_file *m, void *data)
 {
+	_rtw_mstat_seq_dump(m);
+
 	return 0;
 }
 #endif /* DBG_MEM_ALLOC */
@@ -2011,7 +2013,7 @@ ssize_t proc_set_best_channel(struct file *file, const char *buffer,
 	struct mlme_ext_priv *pmlmeext = &padapter->mlmeextpriv;
 	char tmp[32];
 
-	if(count < 1)
+	if (count < 1)
 		return -EFAULT;
 
 	if(buffer && !copy_from_user(tmp, buffer, sizeof(tmp)))
@@ -2381,6 +2383,11 @@ ssize_t proc_set_sreset(struct file *file, const char *buffer,
 
 int proc_get_odm_dbg_comp(struct seq_file *m, void *data)
 {
+	struct net_device *dev = data;
+	_adapter *adapter = (_adapter *)rtw_netdev_priv(dev);
+
+	_rtw_odm_dbg_comp_msg_seq(adapter, m);
+
 	return 0;
 }
 
@@ -2411,6 +2418,11 @@ ssize_t proc_set_odm_dbg_comp(struct file *file, const char *buffer,
 
 int proc_get_odm_dbg_level(struct seq_file *m, void *data)
 {
+	struct net_device *dev = data;
+	_adapter *adapter = (_adapter *)rtw_netdev_priv(dev);
+
+	_rtw_odm_dbg_level_msg_seq(adapter, m);
+
 	return 0;
 }
 
@@ -2441,6 +2453,11 @@ ssize_t proc_set_odm_dbg_level(struct file *file, const char *buffer,
 
 int proc_get_odm_adaptivity(struct seq_file *m, void *data)
 {
+	struct net_device *dev = data;
+	_adapter *padapter = (_adapter *)rtw_netdev_priv(dev);
+
+	_rtw_odm_adaptivity_parm_msg_seq(padapter, m);
+
 	return 0;
 }
 

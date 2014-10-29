@@ -1309,6 +1309,7 @@ typedef enum mstat_status{
 #ifdef DBG_MEM_ALLOC
 void rtw_mstat_update(const enum mstat_f flags, const MSTAT_STATUS status, u32 sz);
 int _rtw_mstat_dump(char *buf, int len);
+void _rtw_mstat_seq_dump(struct seq_file *m);
 void rtw_mstat_dump (void);
 u8* dbg_rtw_vmalloc(u32 sz, const enum mstat_f flags, const char *func, const int line);
 u8* dbg_rtw_zvmalloc(u32 sz, const enum mstat_f flags, const char *func, const int line);

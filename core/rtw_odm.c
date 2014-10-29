@@ -131,6 +131,22 @@ int _rtw_odm_dbg_comp_msg(_adapter *adapter, char *buf, int len)
 	return cnt;
 }
 
+void _rtw_odm_dbg_comp_msg_seq(_adapter *adapter, struct seq_file *m)
+{
+	HAL_DATA_TYPE *pHalData = GET_HAL_DATA(adapter);
+	DM_ODM_T *odm = &pHalData->odmpriv;
+	u64 dbg_comp;
+	int i;
+
+	rtw_hal_get_def_var(adapter, HW_DEF_ODM_DBG_FLAG, &dbg_comp);
+	seq_printf(m, "odm.DebugComponents = 0x%016llx \n", dbg_comp);
+	for (i=0;i<RTW_ODM_COMP_MAX;i++) {
+		if (odm_comp_str[i])
+			seq_printf(m, "%cBIT%-2d %s\n",
+				(BIT0 << i) & dbg_comp ? '+' : ' ', i, odm_comp_str[i]);
+	}
+}
+
 void rtw_odm_dbg_comp_msg(_adapter *adapter)
 {
 	char buf[768] = {0};
@@ -162,6 +178,21 @@ int _rtw_odm_dbg_level_msg(_adapter *adapter, char *buf, int len)
 	return cnt;
 }
 
+void _rtw_odm_dbg_level_msg_seq(_adapter *adapter, struct seq_file *m)
+{
+	HAL_DATA_TYPE *pHalData = GET_HAL_DATA(adapter);
+	DM_ODM_T *odm = &pHalData->odmpriv;
+	u32 dbg_level;
+	int i;
+
+	rtw_hal_get_def_var(adapter, HW_DEF_ODM_DBG_LEVEL, &dbg_level);
+	seq_printf(m, "odm.DebugDebugLevel = %u\n", dbg_level);
+	for (i=0;i<RTW_ODM_DBG_LEVEL_NUM;i++) {
+		if (odm_dbg_level_str[i])
+			seq_printf(m, "%u %s\n", i, odm_dbg_level_str[i]);
+	}
+}
+
 void rtw_odm_dbg_level_msg(_adapter *adapter)
 {
 	char buf[100] = {0};
@@ -181,6 +212,24 @@ int _rtw_odm_adaptivity_parm_msg(_adapter *adapter, char *buf, int len)
 	DM_ODM_T *odm = &pHalData->odmpriv;
 
 	return snprintf(buf, len,
+		"%10s %16s %8s %10s %11s %14s\n"
+		"0x%-8x %-16d 0x%-6x %-10d %-11u %-14u\n",
+		"TH_L2H_ini", "TH_EDCCA_HL_diff", "IGI_Base", "ForceEDCCA", "AdapEn_RSSI", "IGI_LowerBound",
+		(u8)odm->TH_L2H_ini,
+		odm->TH_EDCCA_HL_diff,
+		odm->IGI_Base,
+		odm->ForceEDCCA,
+		odm->AdapEn_RSSI,
+		odm->IGI_LowerBound
+	);
+}
+
+void _rtw_odm_adaptivity_parm_msg_seq(_adapter *adapter, struct seq_file *m)
+{
+	HAL_DATA_TYPE *pHalData = GET_HAL_DATA(adapter);
+	DM_ODM_T *odm = &pHalData->odmpriv;
+
+	seq_printf(m,
 		"%10s %16s %8s %10s %11s %14s\n"
 		"0x%-8x %-16d 0x%-6x %-10d %-11u %-14u\n",
 		"TH_L2H_ini", "TH_EDCCA_HL_diff", "IGI_Base", "ForceEDCCA", "AdapEn_RSSI", "IGI_LowerBound",
