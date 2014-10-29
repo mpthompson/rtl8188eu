@@ -323,9 +323,9 @@ static int	rtw_proc_cnt = 0;
 
 #define RTW_PROC_NAME DRV_NAME
 
+#if(LINUX_VERSION_CODE < KERNEL_VERSION(3,10,0))
 void rtw_proc_init_one(struct net_device *dev)
 {
-#if(LINUX_VERSION_CODE < KERNEL_VERSION(3,10,0))
 	struct proc_dir_entry *dir_dev = NULL;
 	struct proc_dir_entry *entry=NULL;
 	_adapter	*padapter = rtw_netdev_priv(dev);
@@ -716,10 +716,119 @@ void rtw_proc_init_one(struct net_device *dev)
 		}
 		entry->write_proc = proc_set_odm_adaptivity;
 	}
-#else /* kernel version < 3.10 */
-		DBG_871X(KERN_ERR "Unable to create /proc entry in this kernel version\n");
-#endif /* kernel version < 3.10 */
 }
+#else /* kernel version < 3.10 */
+
+static int proc_get_drv_version_open(struct inode *inode, struct file *file){
+	return single_open(file, proc_get_drv_version, PDE_DATA(inode));
+}
+
+static const struct file_operations proc_get_drv_version_fops = {
+	.owner = THIS_MODULE,
+	.open = proc_get_drv_version_open,
+	.read = seq_read,
+	.llseek = seq_lseek,
+	.release = single_release,
+};
+
+static int proc_get_best_channel_open(struct inode *inode, struct file *file){
+	return single_open(file, proc_get_best_channel, PDE_DATA(inode));
+}
+
+static const struct file_operations proc_get_best_channel_fops = {
+	.owner = THIS_MODULE,
+	.open = proc_get_best_channel_open,
+	.read = seq_read,
+	.write = proc_set_best_channel,
+	.llseek = seq_lseek,
+	.release = single_release,
+};
+
+void rtw_proc_init_one(struct net_device *dev)
+{
+	struct proc_dir_entry *dir_dev = NULL;
+	struct proc_dir_entry *entry=NULL;
+	_adapter	*padapter = rtw_netdev_priv(dev);
+	u8 rf_type;
+
+	if(rtw_proc == NULL)
+	{
+		if(padapter->chip_type == RTL8188C_8192C)
+		{
+			_rtw_memcpy(rtw_proc_name, RTL8192C_PROC_NAME, sizeof(RTL8192C_PROC_NAME));
+		}
+		else if(padapter->chip_type == RTL8192D)
+		{
+			_rtw_memcpy(rtw_proc_name, RTL8192D_PROC_NAME, sizeof(RTL8192D_PROC_NAME));
+		}
+		else if(padapter->chip_type == RTL8723A)
+		{
+			_rtw_memcpy(rtw_proc_name, RTW_PROC_NAME, sizeof(RTW_PROC_NAME));
+		}
+		else if(padapter->chip_type == RTL8188E)
+		{
+			_rtw_memcpy(rtw_proc_name, RTW_PROC_NAME, sizeof(RTW_PROC_NAME));
+		}
+		else
+		{
+			_rtw_memcpy(rtw_proc_name, RTW_PROC_NAME, sizeof(RTW_PROC_NAME));
+		}
+
+		rtw_proc = proc_mkdir(rtw_proc_name, init_net.proc_net);
+		if (rtw_proc == NULL) {
+			DBG_871X(KERN_ERR "Unable to create rtw_proc directory\n");
+			return;
+		}
+
+		entry = proc_create_data("ver_info", S_IFREG | S_IRUGO, 
+				rtw_proc, &proc_get_drv_version_fops, dev);
+		if (!entry) {
+			DBG_871X("Unable to create_proc_read_entry!\n");
+			return;
+		}
+		
+#ifdef DBG_MEM_ALLOC
+#endif /* DBG_MEM_ALLOC */
+	}
+
+	if (padapter->dir_dev == NULL)
+	{
+		padapter->dir_dev = proc_mkdir(dev->name, rtw_proc);
+
+		dir_dev = padapter->dir_dev;
+
+		if (dir_dev == NULL)
+		{
+			if (rtw_proc_cnt == 0)
+			{
+				if (rtw_proc) {
+					remove_proc_entry(rtw_proc_name, init_net.proc_net);
+					rtw_proc = NULL;
+				}
+			}
+
+			DBG_871X("Unable to create dir_dev directory\n");
+			return;
+		}
+	}
+	else
+	{
+		return;
+	}
+
+	rtw_proc_cnt++;
+
+#ifdef CONFIG_FIND_BEST_CHANNEL
+	entry = proc_create_data("best_channel", S_IFREG | S_IRUGO,
+				   dir_dev, &proc_get_best_channel_fops, dev);
+	if (!entry) {
+		DBG_871X("Unable to create_proc_read_entry!\n");
+		return;
+	}
+#endif
+
+}
+#endif /* kernel version < 3.10 */
 
 void rtw_proc_remove_one(struct net_device *dev)
 {
@@ -1037,6 +1146,7 @@ unsigned int rtw_classify8021d(struct sk_buff *skb)
 	return dscp >> 5;
 }
 
+#if(LINUX_VERSION_CODE < KERNEL_VERSION(3,10,0))
 static u16 rtw_select_queue(struct net_device *dev, struct sk_buff *skb)
 {
 	_adapter	*padapter = rtw_netdev_priv(dev);
@@ -1051,6 +1161,23 @@ static u16 rtw_select_queue(struct net_device *dev, struct sk_buff *skb)
 
 	return rtw_1d_to_queue[skb->priority];
 }
+#else
+static u16 rtw_select_queue(struct net_device *dev, struct sk_buff *skb,
+			void *accel_priv, select_queue_fallback_t fallback)
+{
+	_adapter	*padapter = rtw_netdev_priv(dev);
+	struct mlme_priv *pmlmepriv = &padapter->mlmepriv;
+
+	skb->priority = rtw_classify8021d(skb);
+
+	if(pmlmepriv->acm_mask != 0)
+	{
+		skb->priority = qos_acm(pmlmepriv->acm_mask, skb->priority);
+	}
+
+	return rtw_1d_to_queue[skb->priority];
+}
+#endif
 
 u16 rtw_recv_select_queue(struct sk_buff *skb)
 {

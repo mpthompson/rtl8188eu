@@ -194,7 +194,7 @@
 #define CONFIG_GLOBAL_UI_PID
 
 #define CONFIG_LAYER2_ROAMING
-#define CONFIG_LAYER2_ROAMING_RESUME
+//#define CONFIG_LAYER2_ROAMING_RESUME
 //#define CONFIG_ADAPTOR_INFO_CACHING_FILE // now just applied on 8192cu only, should make it general...
 //#define CONFIG_RESUME_IN_WORKQUEUE
 //#define CONFIG_SET_SCAN_DENY_TIMER
@@ -210,7 +210,7 @@
 #endif	// CONFIG_BR_EXT
 
 #define CONFIG_TX_MCAST2UNI		// Support IP multicast->unicast
-//#define CONFIG_CHECK_AC_LIFETIME 	// Check packet lifetime of 4 ACs.
+#define CONFIG_CHECK_AC_LIFETIME 	// Check packet lifetime of 4 ACs.
 
 /* 
  * Interface  Related Config 
@@ -260,7 +260,7 @@
 
 #define CONFIG_OUT_EP_WIFI_MODE	0
 
-#define ENABLE_USB_DROP_INCORRECT_OUT
+#define ENABLE_USB_DROP_INCORRECT_OUT	0
 
 
 //#define RTL8192CU_ADHOC_WORKAROUND_SETTING	
@@ -362,9 +362,9 @@
 /*
  * Debug Related Config
  */
-#define DBG	1
+#define DBG	0
 
-#define CONFIG_DEBUG /* DBG_871X, etc... */
+//#define CONFIG_DEBUG /* DBG_871X, etc... */
 //#define CONFIG_DEBUG_RTL871X /* RT_TRACE, RT_PRINT_DATA, _func_enter_, _func_exit_ */
 
 #define CONFIG_PROC_DEBUG

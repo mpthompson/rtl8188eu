@@ -62,6 +62,8 @@
 #ifdef CONFIG_PROC_DEBUG
 #include <rtw_version.h>
 
+#if(LINUX_VERSION_CODE < KERNEL_VERSION(3,10,0))
+
 int proc_get_drv_version(char *page, char **start,
 			  off_t offset, int count,
 			  int *eof, void *data)
@@ -1365,6 +1367,349 @@ int proc_set_odm_adaptivity(struct file *file, const char *buffer, unsigned long
 	
 	return count;
 }
+#else /* kernel version < 3.10 */
+
+int proc_get_drv_version(struct seq_file *m, void *data)
+{
+	seq_printf(m, "%s\n", DRIVERVERSION);
+	return 0;
+}
+
+#ifdef DBG_MEM_ALLOC
+int proc_get_mstat(struct seq_file *m, void *data)
+{
+	return 0;
+}
+#endif /* DBG_MEM_ALLOC */
+
+int proc_get_write_reg(struct seq_file *m, void *data)
+{
+	return 0;
+}
+
+int proc_set_write_reg(struct file *file, const char *buffer,
+		size_t count, loff_t *pos)
+{
+	return 0;
+}
+
+int proc_get_read_reg(struct seq_file *m, void *data)
+{
+	return 0;
+}
+
+ssize_t proc_set_read_reg(struct file *file, const char *buffer,
+		size_t count, loff_t *pos)
+{
+	return 0;
+}
+
+int proc_get_fwstate(struct seq_file *m, void *data)
+{
+	return 0;
+}
+
+int proc_get_sec_info(struct seq_file *m, void *data)
+{
+	return 0;
+}
+
+int proc_get_mlmext_state(struct seq_file *m, void *data)
+{
+	return 0;
+}
+
+int proc_get_qos_option(struct seq_file *m, void *data)
+{
+	return 0;
+}
+
+int proc_get_ht_option(struct seq_file *m, void *data)
+{
+	return 0;
+}
+
+int proc_get_rf_info(struct seq_file *m, void *data)
+{
+	return 0;
+}
+
+int proc_get_ap_info(struct seq_file *m, void *data)
+{
+	return 0;
+}
+
+int proc_get_adapter_state(struct seq_file *m, void *data)
+{
+	return 0;
+}
+
+int proc_get_trx_info(struct seq_file *m, void *data)
+{
+	return 0;
+}
+
+int proc_get_mac_reg_dump1(struct seq_file *m, void *data)
+{
+	return 0;
+}
+
+int proc_get_mac_reg_dump2(struct seq_file *m, void *data)
+{
+	return 0;
+}
+
+int proc_get_mac_reg_dump3(struct seq_file *m, void *data)
+{
+	return 0;
+}
+
+int proc_get_bb_reg_dump1(struct seq_file *m, void *data)
+{
+	return 0;
+}
+
+int proc_get_bb_reg_dump2(struct seq_file *m, void *data)
+{
+	return 0;
+}
+
+int proc_get_bb_reg_dump3(struct seq_file *m, void *data)
+{
+	return 0;
+}
+
+int proc_get_rf_reg_dump1(struct seq_file *m, void *data)
+{
+	return 0;
+}
+
+int proc_get_rf_reg_dump2(struct seq_file *m, void *data)
+{
+	return 0;
+}
+
+int proc_get_rf_reg_dump3(struct seq_file *m, void *data)
+{
+	return 0;
+}
+
+int proc_get_rf_reg_dump4(struct seq_file *m, void *data)
+{
+	return 0;
+}
+
+#ifdef CONFIG_AP_MODE
+int proc_get_all_sta_info(struct seq_file *m, void *data)
+{
+	return 0;
+}
+#endif
+
+#ifdef DBG_MEMORY_LEAK
+int proc_get_malloc_cnt(struct seq_file *m, void *data)
+{
+	return 0;
+}
+#endif
+
+#ifdef CONFIG_FIND_BEST_CHANNEL
+int proc_get_best_channel(struct seq_file *m, void *data)
+{
+	struct net_device *dev = data;
+	_adapter *padapter = (_adapter *)rtw_netdev_priv(dev);
+	struct mlme_ext_priv *pmlmeext = &padapter->mlmeextpriv;
+	u32 i, best_channel_24G = 1, best_channel_5G = 36, index_24G = 0, index_5G = 0;
+
+	for (i=0; pmlmeext->channel_set[i].ChannelNum !=0; i++) {
+		if ( pmlmeext->channel_set[i].ChannelNum == 1)
+			index_24G = i;
+		if ( pmlmeext->channel_set[i].ChannelNum == 36)
+			index_5G = i;
+	}	
+	
+	for (i=0; pmlmeext->channel_set[i].ChannelNum !=0; i++) {
+		// 2.4G
+		if ( pmlmeext->channel_set[i].ChannelNum == 6 ) {
+			if ( pmlmeext->channel_set[i].rx_count < pmlmeext->channel_set[index_24G].rx_count ) {
+				index_24G = i;
+				best_channel_24G = pmlmeext->channel_set[i].ChannelNum;
+			}
+		}
+
+		// 5G
+		if ( pmlmeext->channel_set[i].ChannelNum >= 36
+			&& pmlmeext->channel_set[i].ChannelNum < 140 ) {
+			 // Find primary channel
+			if ( (( pmlmeext->channel_set[i].ChannelNum - 36) % 8 == 0)
+				&& (pmlmeext->channel_set[i].rx_count < pmlmeext->channel_set[index_5G].rx_count) ) {
+				index_5G = i;
+				best_channel_5G = pmlmeext->channel_set[i].ChannelNum;
+			}
+		}
+
+		if ( pmlmeext->channel_set[i].ChannelNum >= 149
+			&& pmlmeext->channel_set[i].ChannelNum < 165) {
+			 // find primary channel
+			if ( (( pmlmeext->channel_set[i].ChannelNum - 149) % 8 == 0)
+				&& (pmlmeext->channel_set[i].rx_count < pmlmeext->channel_set[index_5G].rx_count) ) {
+				index_5G = i;
+				best_channel_5G = pmlmeext->channel_set[i].ChannelNum;
+			}
+		}
+#if 1 // debug
+		seq_printf(m, "The rx cnt of channel %3d = %d\n", 
+			pmlmeext->channel_set[i].ChannelNum, 
+			pmlmeext->channel_set[i].rx_count);
+#endif
+	}
+	
+	seq_printf(m, "best_channel_5G = %d\n", best_channel_5G);
+	seq_printf(m, "best_channel_24G = %d\n", best_channel_24G);
+
+	return 0;
+}
+
+ssize_t proc_set_best_channel(struct file *file, const char *buffer,
+		size_t count, loff_t *pos)
+{
+	return 0;
+}
+#endif
+
+int proc_get_rx_signal(struct seq_file *m, void *data)
+{
+	return 0;
+}
+
+ssize_t proc_set_rx_signal(struct file *file, const char *buffer,
+		size_t count, loff_t *pos)
+{
+	return 0;
+}
+
+#ifdef CONFIG_80211N_HT
+int proc_get_ht_enable(struct seq_file *m, void *data)
+{
+	return 0;
+}
+
+ssize_t proc_set_ht_enable(struct file *file, const char *buffer,
+		size_t count, loff_t *pos)
+{
+	return 0;
+}
+
+int proc_get_cbw40_enable(struct seq_file *m, void *data)
+{
+	return 0;
+}
+
+ssize_t proc_set_cbw40_enable(struct file *file, const char *buffer,
+		size_t count, loff_t *pos)
+{
+	return 0;
+}
+
+int proc_get_ampdu_enable(struct seq_file *m, void *data)
+{
+	return 0;
+}
+		  
+ssize_t proc_set_ampdu_enable(struct file *file, const char *buffer,
+		size_t count, loff_t *pos)
+{
+	return 0;
+}
+
+int proc_get_rx_stbc(struct seq_file *m, void *data)
+{
+	return 0;
+}
+	
+ssize_t proc_set_rx_stbc(struct file *file, const char *buffer,
+		size_t count, loff_t *pos)
+{
+	return 0;
+}
+#endif //CONFIG_80211N_HT
+
+int proc_get_two_path_rssi(struct seq_file *m, void *data)
+{
+	return 0;
+}
+
+int proc_get_rssi_disp(struct seq_file *m, void *data)
+{
+	return 0;
+}
+
+ssize_t proc_set_rssi_disp(struct file *file, const char *buffer,
+		size_t count, loff_t *pos)
+{
+	return 0;
+}
+
+#ifdef CONFIG_BT_COEXIST
+int proc_get_btcoex_dbg(struct seq_file *m, void *data)
+{
+	return 0;
+}
+
+ssize_t proc_set_btcoex_dbg(struct file *file, const char *buffer,
+		size_t count, loff_t *pos)
+{
+	return 0;
+}
+#endif //CONFIG_BT_COEXIST
+
+#if defined(DBG_CONFIG_ERROR_DETECT)
+int proc_get_sreset(struct seq_file *m, void *data)
+{
+	return 0;
+}
+
+ssize_t proc_set_sreset(struct file *file, const char *buffer,
+		size_t count, loff_t *pos)
+{
+	return 0;
+}
+#endif /* DBG_CONFIG_ERROR_DETECT */
+
+int proc_get_odm_dbg_comp(struct seq_file *m, void *data)
+{
+	return 0;
+}
+
+int proc_set_odm_dbg_comp(struct file *file, const char *buffer,
+		size_t count, loff_t *pos)
+{
+	return 0;
+}
+
+int proc_get_odm_dbg_level(struct seq_file *m, void *data)
+{
+	return 0;
+}
+
+ssize_t proc_set_odm_dbg_level(struct file *file, const char *buffer,
+		size_t count, loff_t *pos)
+{
+	return 0;
+}
+
+int proc_get_odm_adaptivity(struct seq_file *m, void *data)
+{
+	return 0;
+}
+
+ssize_t proc_set_odm_adaptivity(struct file *file, const char *buffer,
+		size_t count, loff_t *pos)
+{
+	return 0;
+}
+
+#endif /* kernel version < 3.10 */
 
 #endif
 
