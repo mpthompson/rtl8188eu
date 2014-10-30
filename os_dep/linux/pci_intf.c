@@ -1626,6 +1626,10 @@ static int rtw_resume(struct pci_dev *pdev)
 }
 #endif
 
+static const struct device_type wlan_type = {
+	.name = "wlan",
+};
+
 _adapter *rtw_pci_if1_init(struct dvobj_priv * dvobj, struct pci_dev *pdev, const struct pci_device_id *pdid)
 {
 	_adapter *padapter = NULL;
@@ -1666,6 +1670,7 @@ _adapter *rtw_pci_if1_init(struct dvobj_priv * dvobj, struct pci_dev *pdev, cons
 
 	#if LINUX_VERSION_CODE > KERNEL_VERSION(2,5,0)
 	SET_NETDEV_DEV(pnetdev, dvobj_to_dev(dvobj));
+	SET_NETDEV_DEVTYPE(pnetdev, &wlan_type);
 	#endif
 	if (dvobj->bdma64)
 		pnetdev->features |= NETIF_F_HIGHDMA;

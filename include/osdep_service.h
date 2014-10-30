@@ -131,7 +131,7 @@
 /* emulate a modern version */
 #define LINUX_VERSION_CODE KERNEL_VERSION(2, 6, 35)
 
-#define WIRELESS_EXT -1
+//#define WIRELESS_EXT -1
 #define HZ hz
 #define spin_lock_irqsave mtx_lock_irqsave
 #define spin_lock_bh mtx_lock_irqsave

@@ -383,6 +383,10 @@ void rtw_dev_unload(PADAPTER padapter)
 	RT_TRACE(_module_hci_intfs_c_, _drv_notice_, ("-rtw_dev_unload\n"));
 }
 
+static const struct device_type wlan_type = {
+	.name = "wlan",
+};
+
 static PADAPTER rtw_gspi_if1_init(struct dvobj_priv *dvobj)
 {
 	int status = _FAIL;
@@ -423,6 +427,7 @@ static PADAPTER rtw_gspi_if1_init(struct dvobj_priv *dvobj)
 		goto free_adapter;
 
 	SET_NETDEV_DEV(pnetdev, dvobj_to_dev(dvobj));
+	SET_NETDEV_DEVTYPE(pnetdev, &wlan_type);
 
 #ifdef CONFIG_IOCTL_CFG80211
 	rtw_wdev_alloc(padapter, dvobj_to_dev(dvobj));

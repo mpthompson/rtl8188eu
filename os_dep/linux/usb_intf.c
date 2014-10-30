@@ -1528,6 +1528,10 @@ extern void wifi_pm_power(int on);
 static script_item_u item;
 #endif
 
+static const struct device_type wlan_type = {
+	.name = "wlan",
+};
+
 /*
  * drv_init() - a device potentially for us
  *
@@ -1579,6 +1583,7 @@ _adapter *rtw_usb_if1_init(struct dvobj_priv *dvobj,
 		goto handle_dualmac;
 	}
 	SET_NETDEV_DEV(pnetdev, dvobj_to_dev(dvobj));
+	SET_NETDEV_DEVTYPE(pnetdev, &wlan_type);
 	padapter = rtw_netdev_priv(pnetdev);
 
 #ifdef CONFIG_IOCTL_CFG80211
@@ -1586,7 +1591,6 @@ _adapter *rtw_usb_if1_init(struct dvobj_priv *dvobj,
 		goto handle_dualmac;
 	}
 #endif
-
 
 	//step 2. hook HalFunc, allocate HalData
 	hal_set_hal_ops(padapter);

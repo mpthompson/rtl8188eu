@@ -1671,7 +1671,6 @@ struct net_device *rtw_init_netdev(_adapter *old_padapter)
    	loadparam(padapter, pnetdev);
 
 	return pnetdev;
-
 }
 
 u32 rtw_start_drv_threads(_adapter *padapter)
@@ -2319,6 +2318,9 @@ static const struct net_device_ops rtw_netdev_if2_ops = {
 };
 #endif
 
+static const struct device_type wlan_type = {
+	.name = "wlan",
+};
 
 #ifdef CONFIG_USB_HCI
 	#include <usb_hal.h>
@@ -2381,6 +2383,7 @@ _adapter *rtw_drv_if2_init(_adapter *primary_padapter, void (*set_intf_ops)(stru
 	pdvobjpriv->padapters[pdvobjpriv->iface_nums++] = padapter;
 
 	SET_NETDEV_DEV(pnetdev, dvobj_to_dev(pdvobjpriv));
+	SET_NETDEV_DEVTYPE(pnetdev, &wlan_type);
 	#ifdef CONFIG_IOCTL_CFG80211
 	rtw_wdev_alloc(padapter, dvobj_to_dev(pdvobjpriv));
 	#endif //CONFIG_IOCTL_CFG80211
